@@ -2,7 +2,7 @@
 
 XeDoLine::XeDoLine(int s1, int s2, int s3, int s4, int s5,
                    int m1_in1, int m1_in2, int ena,
-                   int m2_in1, int m2_in2, int enb) {
+                   int m2_in1, int m2_in2, int enb , int trig , int echo) {
   _S_pins[0] = s1;
   _S_pins[1] = s2;
   _S_pins[2] = s3;
@@ -11,6 +11,8 @@ XeDoLine::XeDoLine(int s1, int s2, int s3, int s4, int s5,
 
   _M1_IN1 = m1_in1; _M1_IN2 = m1_in2; _ENA = ena;
   _M2_IN1 = m2_in1; _M2_IN2 = m2_in2; _ENB = enb;
+  _trigPin = trig;
+  _echoPin = echo;
 
   _Kp = 1.0; _Ki = 0.00001; _Kd = 20.0;
   _baseSpeed = 80;
@@ -22,6 +24,8 @@ void XeDoLine::batdau() {
   for (int i = 0; i < 5; i++) pinMode(_S_pins[i], INPUT);
   pinMode(_M1_IN1, OUTPUT); pinMode(_M1_IN2, OUTPUT); pinMode(_ENA, OUTPUT);
   pinMode(_M2_IN1, OUTPUT); pinMode(_M2_IN2, OUTPUT); pinMode(_ENB, OUTPUT);
+  pinMode(_trigPin, OUTPUT);
+  pinMode(_echoPin, INPUT);
   dunglai();
 }
 
@@ -30,8 +34,10 @@ void XeDoLine::chay() {
   if ((unsigned long)(_t - _t_prev) >= 20000) {
     _dt = (_t - _t_prev) / 1000000.0;
     _t_prev = _t;
+    kiemtravatcan();
     doccam();
     PID();
+    
   }
 }
 
@@ -98,3 +104,38 @@ void XeDoLine::caiPID(float kp, float ki, float kd) {
 void XeDoLine::tocdoban(int speed) {
   _baseSpeed = speed;
 }
+void XeDoLine::banhphaitien(int speed){
+  digitalWrite(_M1_IN1, HIGH);
+  analogWrite(_ENA, speed);
+}
+void XeDoLine::banhphailui(int speed){
+  digitalWrite(_M1_IN2, HIGH);
+  analogWrite(_ENA, speed);
+}void XeDoLine::banhtraitien(int speed){
+  digitalWrite(_M2_IN1, HIGH);
+  analogWrite(_ENB, speed);
+}
+void XeDoLine::banhtralui(int speed){
+  digitalWrite(_M2_IN2, HIGH);
+  analogWrite(_ENB, speed);
+} 
+long XeDoLine::dokhoangcach() {
+  digitalWrite(_trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(_trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(_trigPin, LOW);
+
+  long duration = pulseIn(_echoPin, HIGH, 20000); 
+  long distance = duration * 0.034 / 2;
+
+  return distance; 
+}
+void XeDoLine::kiemtravatcan() {
+  long kc = dokhoangcach();  
+  if (kc > 0 && kc < 5) {   
+    dunglai();               
+  }
+}
+
+

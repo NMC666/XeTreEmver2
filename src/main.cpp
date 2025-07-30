@@ -4,8 +4,7 @@
 XeDoLine xe(
   2, 3, 4, 5, 6,   // cảm biến line
   7, 8, 9,         // động cơ trái
-  10, 12, 11       // động cơ phải
-);
+  10, 12, 11  , A0 , A1 )   ; 
 
 void setup() {
   Serial.begin(9600);
